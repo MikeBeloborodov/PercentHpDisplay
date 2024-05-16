@@ -1,6 +1,7 @@
 --- Player Frame
 local playerHpDisplay = CreateFrame("Frame", "playerHpDisplay", PlayerFrameHealthBar)
 playerHpDisplay:RegisterEvent("UNIT_HEALTH")
+playerHpDisplay:RegisterEvent("PLAYER_ENTERING_WORLD")
 playerHpDisplay:SetWidth(1)
 playerHpDisplay:SetHeight(1)
 playerHpDisplay:SetPoint("TOP", PlayerFrameHealthBar, "TOP", 0, 0)
@@ -12,7 +13,7 @@ playerHpText:SetTextColor(1, 1, 1)
 
 playerHpDisplay:SetScript("OnEvent", function ()
 	local hpChangeTarget = arg1
-	if hpChangeTarget == "player" then
+	if hpChangeTarget == "player" or event == "PLAYER_ENTERING_WORLD" then
 		local healthString = tostring( math.floor( tonumber(UnitHealth("player")) / tonumber(UnitHealthMax("player")) * 100) ) .. "%"
 		playerHpText:SetText(healthString)
 	end
@@ -32,17 +33,19 @@ targetHpText:SetText("")
 targetHpText:SetTextColor(1, 1, 1)
 
 targetHpDisplay:SetScript("OnEvent", function ()
+	if (UnitHealth("target") == 0) then targetHpText:SetText(""); return end
+
 	local healthString = tostring( math.floor(tonumber(UnitHealth("target")) / tonumber( UnitHealthMax("target")) * 100) ) .. "%"
 	if tonumber(UnitHealthMax("target")) > tonumber(UnitHealthMax("player")) then
 		healthString = healthString .. " !!!"
 	end
 	if event == "UNIT_HEALTH" then 
 		local hpChangeTarget = arg1
-		if hpChangeTarget == "target" and UnitHealth("target") ~= 0 then
+		if hpChangeTarget == "target" then
 			targetHpText:SetText(healthString)
 		end
 	end
-	if event == "PLAYER_TARGET_CHANGED" and UnitHealth("target") ~= 0 then
+	if event == "PLAYER_TARGET_CHANGED" then
 		targetHpText:SetText(healthString)
 	end
 end)
