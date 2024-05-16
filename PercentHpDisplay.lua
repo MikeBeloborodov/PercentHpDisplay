@@ -1,64 +1,48 @@
--- Util functions
+--- Player Frame
+local playerHpDisplay = CreateFrame("Frame", "playerHpDisplay", PlayerFrameHealthBar)
+playerHpDisplay:RegisterEvent("UNIT_HEALTH")
+playerHpDisplay:SetWidth(1)
+playerHpDisplay:SetHeight(1)
+playerHpDisplay:SetPoint("TOP", PlayerFrameHealthBar, "TOP", 0, 0)
 
-function Print(msg, r, g, b)
-	DEFAULT_CHAT_FRAME:AddMessage(msg, r, g, b)
-end
+local playerHpText = playerHpDisplay:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+playerHpText:SetPoint("TOP", playerHpDisplay, "TOP", 0, 0)
+playerHpText:SetText(tostring( math.floor( tonumber(UnitHealth("player")) / tonumber(UnitHealthMax("player")) * 100) ) .. "%")
+playerHpText:SetTextColor(1, 1, 1)
 
-function PrintRed(msg)
-	Print(msg, 1.0, 0.2, 0.2)
-end
-
-function PrintWhite(msg)
-	Print(msg, 1.0, 1.0, 1.0)
-end
-
--- Reload UI
-
-SLASH_RELOAD1 = "/reload"
-SlashCmdList["RELOAD"] = function (msg)
-	ReloadUI();
-end
-
--- All events
-
-local eventsFrame = CreateFrame('Frame')
-eventsFrame:UnregisterAllEvents()
-eventsFrame.IsOn = false
-eventsFrame:SetScript('OnEvent',
-    function()
-		PrintWhite(event)
-    end
-)
-
-SLASH_EVENTS1 = "/events"
-SlashCmdList["EVENTS"] = function (msg)
-	if eventsFrame.IsOn then
-		eventsFrame.IsOn = false
-		eventsFrame:UnregisterAllEvents()
-	else
-		eventsFrame.IsOn = true
-		eventsFrame:RegisterAllEvents()
+playerHpDisplay:SetScript("OnEvent", function ()
+	local hpChangeTarget = arg1
+	if hpChangeTarget == "player" then
+		local healthString = tostring( math.floor( tonumber(UnitHealth("player")) / tonumber(UnitHealthMax("player")) * 100) ) .. "%"
+		playerHpText:SetText(healthString)
 	end
-end
+end)
 
--- Get frame name on failed spellcast
+-- Target Frame
+targetHpDisplay = CreateFrame("Frame", "targetHpDisplay", TargetFrameHealthBar)
+targetHpDisplay:RegisterEvent("UNIT_HEALTH")
+targetHpDisplay:RegisterEvent("PLAYER_TARGET_CHANGED")
+targetHpDisplay:SetWidth(1)
+targetHpDisplay:SetHeight(1)
+targetHpDisplay:SetPoint("TOP", TargetFrameHealthBar, "TOP", 0, 0)
 
-local getWidgetsFrame = CreateFrame("Frame")
-getWidgetsFrame.IsOn = false
-getWidgetsFrame:SetScript("OnEvent",
-	function()
-		local frameId = GetMouseFocus():GetName()
-		PrintRed(frameId)
+local targetHpText = targetHpDisplay:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+targetHpText:SetPoint("TOP", targetHpDisplay, "TOP", 0, 0)
+targetHpText:SetText("")
+targetHpText:SetTextColor(1, 1, 1)
+
+targetHpDisplay:SetScript("OnEvent", function ()
+	local healthString = tostring( math.floor(tonumber(UnitHealth("target")) / tonumber( UnitHealthMax("target")) * 100) ) .. "%"
+	if tonumber(UnitHealthMax("target")) > tonumber(UnitHealthMax("player")) then
+		healthString = healthString .. " !!!"
 	end
-)
-
-SLASH_WIDGETS1 = "/widgets"
-SlashCmdList["WIDGETS"] = function (msg)
-	if getWidgetsFrame.IsOn then
-		getWidgetsFrame.IsOn = false
-		getWidgetsFrame:UnregisterEvent("SPELLCAST_FAILED")
-	else
-		getWidgetsFrame.IsOn = true
-		getWidgetsFrame:RegisterEvent("SPELLCAST_FAILED")
+	if event == "UNIT_HEALTH" then 
+		local hpChangeTarget = arg1
+		if hpChangeTarget == "target" and UnitHealth("target") ~= 0 then
+			targetHpText:SetText(healthString)
+		end
 	end
-end
+	if event == "PLAYER_TARGET_CHANGED" and UnitHealth("target") ~= 0 then
+		targetHpText:SetText(healthString)
+	end
+end)
