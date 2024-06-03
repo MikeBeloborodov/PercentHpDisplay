@@ -2,4 +2,4 @@
 ## Title: Percent Hp Display
 ## Notes: Shows Hp in percents.
 ## Author: MikeBeloborodov
-PercentHpDisplay.lua
+PercentHpDisplay.xml

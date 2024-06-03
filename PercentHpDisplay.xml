@@ -1,0 +1,8 @@
+<Ui>
+	<Script file="PercentHpDisplay.lua"/>
+	<Frame name="PercentDisplay" parent="UIParent">
+		<Scripts>
+			<OnLoad>PercentDisplayLoad()</OnLoad>
+		</Scripts>
+	</Frame>
+</Ui>
